@@ -1,0 +1,116 @@
+---
+title: "Assignment1"
+author: "Prerak Patel"
+date: "1/31/2021"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Q1: Data Source  
+--------------------------
+Our dataset **Cell Phone Signal** has been extracted from **CDAC**, is an indian  institue, its IT training branch savors collections of database and datasets used by machine learning community for the analysis of ML algorithms for one of their training programs called Big-Data analytics.
+
+
+### Q2: Importing Cell Phone Survey data set to R Studio with read.csv() method.
+
+```{r cell phone survey}
+setwd("C:\\Users\\prerak\\Desktop\\KSU\\Machine learning\\DataSets")
+CellPhone <- read.csv('Cell Phone Survey.csv')
+```
+#### Q3:Descriptive Statistics of *Cell phone survey* data set 
+Inspecting DataSet 
+```{r}
+library(dplyr)
+glimpse(CellPhone)
+```
+**Arithmetic Mean:** AM of a set of observation is defined as their sum divided number of observations. 
+```{r}
+# Average mpg of a car
+mean(CellPhone$Value.for.the.Dollar)
+```
+**Median:** is the middle value of the observation.
+```{r}
+# Median of weight column
+median(sort(CellPhone$Carrier))
+```
+ **Mode:** it refers to the vaule which occurs to the maximum frequency. 
+```{r}
+# Cylinders are categorical variables which are falls under nominal type of data
+sort(table(CellPhone$Signal.strength), decreasing = TRUE)[1]
+
+# Number of occurrences of origin
+table(CellPhone$Signal.strength)
+```
+ **Measure of Dispersion** 
+ 
+  *Range*
+```{r}
+# Range which gives lowest and highest values of Weight parameter
+range(CellPhone$Signal.strength,  na.rm = TRUE)
+```
+  *Interquartile Range (IQR)* 
+```{r}
+# Quartile breaks a series of values into 4 equal parts
+quantile(CellPhone$Signal.strength, na.rm = TRUE)
+```
+*Variance* 
+```{r}
+# Variance: A measure of the spread of the recorded values on a variable
+var(CellPhone$Signal.strength, na.rm = TRUE)
+```
+*Standard Deviation* 
+```{r}
+# Standard deviation: The square root of the variance reveals the average deviation of the observations from the mean
+sd(CellPhone$Signal.strength, na.rm = TRUE)
+```
+
+### Q3: Transformation  
+```{r}
+# Applying log transformation on Signal Strength column
+log_trans <- log10(CellPhone$Signal.strength)
+#displaying first 20 values
+log_trans[1:20]
+
+# Applying square transformation on value per Dollar
+Sq_Dis <- CellPhone$Value.for.the.Dollar ^ 2
+#displaying first 20 values
+Sq_Dis[1:20]
+
+# Applying Square root transformation on Sq_Dis
+# Displaying first 20 values
+sqrt(Sq_Dis)[1:20]
+```
+
+### Q4: Visualisation 
+
+**Histogram Plot**
+```{r}
+library(ggplot2)
+ggplot(CellPhone, aes(x = Signal.strength)) +
+  geom_histogram() + 
+  ggtitle('Histogram of signal strength of the cell phone carriers')
+```
+
+**Scatter Plot**
+#```{r}
+# Scatter plot of Singal vs rate
+ggplot(CellPhone, aes(x=Cellphone$Value.for.the.Dollar, y=CellPhone$Signal.strength)) + 
+  geom_point() +
+  ggtitle('Scatter plot of Signal Strength vs per Dollar value')
+#```
+
+*Showing the correlation between Price rate vs Signal Strength.* 
+```{r}
+plot(x=CellPhone$Value.for.the.Dollar,
+     y=CellPhone$Signal.strength,
+     xlab='Value/Dollar',
+     ylab='Signal.strength',
+     xlim=c(1,5),
+     ylim=c(1,5),
+     main="S v/s D")
+```
