@@ -1,0 +1,127 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+```{r}
+#setwd("~/R_KSU/ML/Assignment 3")
+bank <- read.csv("UniversalBank.csv")
+```
+
+
+```{r}
+library(reshape)
+library(reshape2)
+str(bank)
+```
+
+```{r}
+summary(bank)
+```
+
+```{r}
+bank$Personal.Loan = as.factor(bank$Personal.Loan)
+bank$Online = as.factor(bank$Online)
+bank$CreditCard = as.factor(bank$CreditCard)
+```
+
+```{r}
+set.seed(1)
+train.index <- sample(row.names(bank), 0.6*dim(bank)[1])  
+test.index <- setdiff(row.names(bank), train.index) 
+train.df <- bank[train.index, ]
+test.df <- bank[test.index, ]
+train <- bank[train.index, ]
+test = bank[train.index,]
+```
+
+
+A. Create a pivot table for the training data with Online as a column variable, CC as a row variable, and Loan as a secondary row variable. 
+The values inside the table should convey the count. In R use functions melt() and cast(), or function table(). In Python, use panda dataframe methods melt()
+and pivot().
+
+```{r}
+table("CC"=bank$CreditCard,"PL"=bank$Personal.Loan,"O/L"=bank$Online)
+```
+```{r}
+t1= recast(bank,bank$CreditCard+bank$Personal.Loan~bank$Online)
+t1
+```
+
+
+B. Consider the task of classifying a customer who owns a bank credit card and is actively using online banking services. Looking at the pivot table, what is the probability that this customer will accept the loan offer? [This is the probability of loan acceptance (Loan = 1) conditional on having a bank credit card (CC = 1) and being an active user of online banking services (Online = 1)].
+
+
+>> Probability of Loan acceptance given having a bank credit card and user of online services is 
+                              82/882 = 0.09297
+
+
+C. Create two separate pivot tables for the training data. One will have Loan (rows) as a function of Online (columns) and the other will have Loan (rows) as a function of CC.
+```{r}
+t2= recast(bank,bank$Personal.Loan~bank$Online)
+t2
+```
+
+
+```{r}
+t3= recast(bank,bank$CreditCard~bank$Online)
+t3
+```
+
+
+D. Compute the following quantities [P(A | B) means “the probability of A given B”]:
+  i. P(CC = 1 | Loan = 1) (the proportion of credit card holders among the        loan acceptors)
+  ii. P(Online = 1 | Loan = 1)
+  iii. P(Loan = 1) (the proportion of loan acceptors)
+  iv. P(CC = 1 | Loan = 0)
+  v. P(Online = 1 | Loan = 0)
+  vi. P(Loan = 0)
+
+```{r}
+table(train[,c(14,10)])
+```
+
+```{r}
+table(train[,c(13,10)])
+```
+
+```{r}
+table(train[,c(10)])
+```
+P(Cc|Pl) = 77/(77+198)     = 0.28
+P(Ol|Pl) = 166/(166+109)   = 0.603
+P(Pl)    = 275/(275+2725)  = 0.1009
+P(Cc|Pl')= 801/(801+1924)  = 0.2939
+P(Ol|Pl')= 1588/(1588+1137)= 0.5827
+P(Pl')   = 2725/(275+2725) = 0.90833
+
+
+E. Use the quantities computed above to compute the naive Bayes probability P(Loan = 1 | CC = 1,
+Online = 1).
+
+```{r}
+((77/(77+198))*(166/(166+109))*(275/(275+2725)))/(((77/(77+198))*(166/(166+109))*(275/(275+2725)))+((801/(801+1924))*(1588/(1588+1137))*2725/(2725+275)))
+```
+
+
+
+F. Compare this value with the one obtained from the pivot table in (B). Which is a more accurate
+estimate?
+
+9.05% are very similar to the 9.29% the difference between the exact method and the naive-baise method is the exact method would need the the exact same independent variable classifications to predict, where the naive bayes method does not.
+
+
+G. Which of the entries in this table are needed for computing P(Loan = 1 | CC = 1, Online = 1)? Run
+naive Bayes on the data. Examine the model output on training data, and find the entry that
+corresponds to P(Loan = 1 | CC = 1, Online = 1). Compare this to the number you obtained in (E).
+
+```{r}
+library('e1071')
+naive.train = train.df[,c(10,13:14)]
+naive.test = test.df[,c(10,13:14)]
+naivebayes = naiveBayes(Personal.Loan~.,data=naive.train)
+naivebayes
+```
+the naive bayes is the exact same output we recieved in the previous methods. (.280)(.603)(.09)/(.280.603.09+.29.58.908) = .09 which is the same response provided as above.
