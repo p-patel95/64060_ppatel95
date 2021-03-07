@@ -219,12 +219,10 @@
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{set.seed}\NormalTok{(}\DecValTok{1}\NormalTok{)}
-\NormalTok{train.index }\OtherTok{\textless{}{-}} \FunctionTok{sample}\NormalTok{(}\FunctionTok{row.names}\NormalTok{(bank), }\FloatTok{0.6}\SpecialCharTok{*}\FunctionTok{dim}\NormalTok{(bank)[}\DecValTok{1}\NormalTok{])  }
+\NormalTok{train.index }\OtherTok{\textless{}{-}} \FunctionTok{sample}\NormalTok{(}\FunctionTok{row.names}\NormalTok{(bank), }\FloatTok{0.7}\SpecialCharTok{*}\FunctionTok{dim}\NormalTok{(bank)[}\DecValTok{1}\NormalTok{])  }
 \NormalTok{test.index }\OtherTok{\textless{}{-}} \FunctionTok{setdiff}\NormalTok{(}\FunctionTok{row.names}\NormalTok{(bank), train.index) }
-\NormalTok{train.df }\OtherTok{\textless{}{-}}\NormalTok{ bank[train.index, ]}
-\NormalTok{test.df }\OtherTok{\textless{}{-}}\NormalTok{ bank[test.index, ]}
 \NormalTok{train }\OtherTok{\textless{}{-}}\NormalTok{ bank[train.index, ]}
-\NormalTok{test }\OtherTok{=}\NormalTok{ bank[train.index,]}
+\NormalTok{test }\OtherTok{\textless{}{-}}\NormalTok{ bank[test.index,]}
 \end{Highlighting}
 \end{Shaded}
 
@@ -370,8 +368,8 @@ Loan = 0) vi. P(Loan = 0)
 \begin{verbatim}
 ##           Personal.Loan
 ## CreditCard    0    1
-##          0 1924  198
-##          1  801   77
+##          0 2241  232
+##          1  933   94
 \end{verbatim}
 
 \begin{Shaded}
@@ -383,8 +381,8 @@ Loan = 0) vi. P(Loan = 0)
 \begin{verbatim}
 ##       Personal.Loan
 ## Online    0    1
-##      0 1137  109
-##      1 1588  166
+##      0 1304  132
+##      1 1870  194
 \end{verbatim}
 
 \begin{Shaded}
@@ -396,34 +394,38 @@ Loan = 0) vi. P(Loan = 0)
 \begin{verbatim}
 ## 
 ##    0    1 
-## 2725  275
+## 3174  326
 \end{verbatim}
 
-P(Cc\textbar Pl) = 77/(77+198) = 0.28 P(Ol\textbar Pl) = 166/(166+109) =
-0.603 P(Pl) = 275/(275+2725) = 0.1009 P(Cc\textbar Pl')= 801/(801+1924)
-= 0.2939 P(Ol\textbar Pl')= 1588/(1588+1137)= 0.5827 P(Pl') =
-2725/(275+2725) = 0.90833
+P(Cc\textbar Pl) = 94/(94+232) = 0.28834 P(Ol\textbar Pl) =
+194/(194+132) = 0.59509 P(Pl) = 326/(326+3174) = 0.09314
+P(Cc\textbar Pl')= 933/(933+2241) = 0.29395 P(Ol\textbar Pl')=
+1870/(1870+1304)= 0.58916 P(Pl') = 3174/(3174+326) = 0.90685
 
 E. Use the quantities computed above to compute the naive Bayes
 probability P(Loan = 1 \textbar{} CC = 1, Online = 1).
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{((}\DecValTok{77}\SpecialCharTok{/}\NormalTok{(}\DecValTok{77}\SpecialCharTok{+}\DecValTok{198}\NormalTok{))}\SpecialCharTok{*}\NormalTok{(}\DecValTok{166}\SpecialCharTok{/}\NormalTok{(}\DecValTok{166}\SpecialCharTok{+}\DecValTok{109}\NormalTok{))}\SpecialCharTok{*}\NormalTok{(}\DecValTok{275}\SpecialCharTok{/}\NormalTok{(}\DecValTok{275}\SpecialCharTok{+}\DecValTok{2725}\NormalTok{)))}\SpecialCharTok{/}\NormalTok{(((}\DecValTok{77}\SpecialCharTok{/}\NormalTok{(}\DecValTok{77}\SpecialCharTok{+}\DecValTok{198}\NormalTok{))}\SpecialCharTok{*}\NormalTok{(}\DecValTok{166}\SpecialCharTok{/}\NormalTok{(}\DecValTok{166}\SpecialCharTok{+}\DecValTok{109}\NormalTok{))}\SpecialCharTok{*}\NormalTok{(}\DecValTok{275}\SpecialCharTok{/}\NormalTok{(}\DecValTok{275}\SpecialCharTok{+}\DecValTok{2725}\NormalTok{)))}\SpecialCharTok{+}\NormalTok{((}\DecValTok{801}\SpecialCharTok{/}\NormalTok{(}\DecValTok{801}\SpecialCharTok{+}\DecValTok{1924}\NormalTok{))}\SpecialCharTok{*}\NormalTok{(}\DecValTok{1588}\SpecialCharTok{/}\NormalTok{(}\DecValTok{1588}\SpecialCharTok{+}\DecValTok{1137}\NormalTok{))}\SpecialCharTok{*}\DecValTok{2725}\SpecialCharTok{/}\NormalTok{(}\DecValTok{2725}\SpecialCharTok{+}\DecValTok{275}\NormalTok{)))}
+\NormalTok{((}\DecValTok{94}\SpecialCharTok{/}\NormalTok{(}\DecValTok{94}\SpecialCharTok{+}\DecValTok{232}\NormalTok{))}\SpecialCharTok{*}\NormalTok{(}\DecValTok{194}\SpecialCharTok{/}\NormalTok{(}\DecValTok{194}\SpecialCharTok{+}\DecValTok{132}\NormalTok{))}\SpecialCharTok{*}\NormalTok{(}\DecValTok{326}\SpecialCharTok{/}\NormalTok{(}\DecValTok{326}\SpecialCharTok{+}\DecValTok{3174}\NormalTok{)))}\SpecialCharTok{/}\NormalTok{(((}\DecValTok{94}\SpecialCharTok{/}\NormalTok{(}\DecValTok{94}\SpecialCharTok{+}\DecValTok{232}\NormalTok{))}\SpecialCharTok{*}\NormalTok{(}\DecValTok{194}\SpecialCharTok{/}\NormalTok{(}\DecValTok{194}\SpecialCharTok{+}\DecValTok{132}\NormalTok{))}\SpecialCharTok{*}\NormalTok{(}\DecValTok{326}\SpecialCharTok{/}\NormalTok{(}\DecValTok{326}\SpecialCharTok{+}\DecValTok{3174}\NormalTok{)))}\SpecialCharTok{+}\NormalTok{((}\DecValTok{933}\SpecialCharTok{/}\NormalTok{(}\DecValTok{933}\SpecialCharTok{+}\DecValTok{2241}\NormalTok{))}\SpecialCharTok{*}\NormalTok{(}\DecValTok{1870}\SpecialCharTok{/}\NormalTok{(}\DecValTok{1870}\SpecialCharTok{+}\DecValTok{1304}\NormalTok{))}\SpecialCharTok{*}\DecValTok{3174}\SpecialCharTok{/}\NormalTok{(}\DecValTok{3174}\SpecialCharTok{+}\DecValTok{326}\NormalTok{)))}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-## [1] 0.09055758
+## [1] 0.09236489
 \end{verbatim}
 
 F. Compare this value with the one obtained from the pivot table in (B).
 Which is a more accurate estimate?
 
-9.05\% are very similar to the 9.29\% the difference between the exact
-method and the naive-baise method is the exact method would need the the
+\begin{quote}
+\begin{quote}
+9.05\% are very similar to the 9.23\% the difference between the exact
+method and the naive-bayes method is the exact method would need the the
 exact same independent variable classifications to predict, where the
 naive bayes method does not.
+\end{quote}
+\end{quote}
 
 G. Which of the entries in this table are needed for computing P(Loan =
 1 \textbar{} CC = 1, Online = 1)? Run naive Bayes on the data. Examine
@@ -443,9 +445,9 @@ you obtained in (E).
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{naive.train }\OtherTok{=}\NormalTok{ train.df[,}\FunctionTok{c}\NormalTok{(}\DecValTok{10}\NormalTok{,}\DecValTok{13}\SpecialCharTok{:}\DecValTok{14}\NormalTok{)]}
-\NormalTok{naive.test }\OtherTok{=}\NormalTok{ test.df[,}\FunctionTok{c}\NormalTok{(}\DecValTok{10}\NormalTok{,}\DecValTok{13}\SpecialCharTok{:}\DecValTok{14}\NormalTok{)]}
-\NormalTok{naivebayes }\OtherTok{=} \FunctionTok{naiveBayes}\NormalTok{(Personal.Loan}\SpecialCharTok{\textasciitilde{}}\NormalTok{.,}\AttributeTok{data=}\NormalTok{naive.train)}
+\NormalTok{train }\OtherTok{=}\NormalTok{ train[,}\FunctionTok{c}\NormalTok{(}\DecValTok{10}\NormalTok{,}\DecValTok{13}\SpecialCharTok{:}\DecValTok{14}\NormalTok{)]}
+\NormalTok{test }\OtherTok{=}\NormalTok{ test[,}\FunctionTok{c}\NormalTok{(}\DecValTok{10}\NormalTok{,}\DecValTok{13}\SpecialCharTok{:}\DecValTok{14}\NormalTok{)]}
+\NormalTok{naivebayes }\OtherTok{=} \FunctionTok{naiveBayes}\NormalTok{(Personal.Loan}\SpecialCharTok{\textasciitilde{}}\NormalTok{.,}\AttributeTok{data=}\NormalTok{train)}
 \NormalTok{naivebayes}
 \end{Highlighting}
 \end{Shaded}
@@ -460,22 +462,27 @@ you obtained in (E).
 ## A-priori probabilities:
 ## Y
 ##          0          1 
-## 0.90833333 0.09166667 
+## 0.90685714 0.09314286 
 ## 
 ## Conditional probabilities:
 ##    Online
 ## Y           0         1
-##   0 0.4172477 0.5827523
-##   1 0.3963636 0.6036364
+##   0 0.4108381 0.5891619
+##   1 0.4049080 0.5950920
 ## 
 ##    CreditCard
-## Y          0        1
-##   0 0.706055 0.293945
-##   1 0.720000 0.280000
+## Y           0         1
+##   0 0.7060491 0.2939509
+##   1 0.7116564 0.2883436
 \end{verbatim}
 
-the naive bayes is the exact same output we recieved in the previous
-methods. (.280)(.603)(.09)/(.280.603.09+.29.58.908) = .09 which is the
-same response provided as above.
+\begin{quote}
+\begin{quote}
+The naive bayes is the exact same output we retrieved in the previous
+methods. (0.288)\emph{(0.595)}(0.093)/((0.288)\emph{(0.595)}(0.093) +
+(0.293)\emph{(0.589)}(0.906) = .0089 which is almost the same response
+provided as above.
+\end{quote}
+\end{quote}
 
 \end{document}

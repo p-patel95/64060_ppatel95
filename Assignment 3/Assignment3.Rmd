@@ -29,12 +29,10 @@ bank$CreditCard = as.factor(bank$CreditCard)
 
 ```{r}
 set.seed(1)
-train.index <- sample(row.names(bank), 0.6*dim(bank)[1])  
+train.index <- sample(row.names(bank), 0.7*dim(bank)[1])  
 test.index <- setdiff(row.names(bank), train.index) 
-train.df <- bank[train.index, ]
-test.df <- bank[test.index, ]
 train <- bank[train.index, ]
-test = bank[train.index,]
+test <- bank[test.index,]
 ```
 
 
@@ -90,19 +88,19 @@ table(train[,c(13,10)])
 ```{r}
 table(train[,c(10)])
 ```
-P(Cc|Pl) = 77/(77+198)     = 0.28
-P(Ol|Pl) = 166/(166+109)   = 0.603
-P(Pl)    = 275/(275+2725)  = 0.1009
-P(Cc|Pl')= 801/(801+1924)  = 0.2939
-P(Ol|Pl')= 1588/(1588+1137)= 0.5827
-P(Pl')   = 2725/(275+2725) = 0.90833
+P(Cc|Pl) = 94/(94+232)     = 0.28834
+P(Ol|Pl) = 194/(194+132)   = 0.59509
+P(Pl)    = 326/(326+3174)  = 0.09314
+P(Cc|Pl')= 933/(933+2241)  = 0.29395
+P(Ol|Pl')= 1870/(1870+1304)= 0.58916
+P(Pl')   = 3174/(3174+326) = 0.90685
 
 
 E. Use the quantities computed above to compute the naive Bayes probability P(Loan = 1 | CC = 1,
 Online = 1).
 
 ```{r}
-((77/(77+198))*(166/(166+109))*(275/(275+2725)))/(((77/(77+198))*(166/(166+109))*(275/(275+2725)))+((801/(801+1924))*(1588/(1588+1137))*2725/(2725+275)))
+((94/(94+232))*(194/(194+132))*(326/(326+3174)))/(((94/(94+232))*(194/(194+132))*(326/(326+3174)))+((933/(933+2241))*(1870/(1870+1304))*3174/(3174+326)))
 ```
 
 
@@ -110,18 +108,19 @@ Online = 1).
 F. Compare this value with the one obtained from the pivot table in (B). Which is a more accurate
 estimate?
 
-9.05% are very similar to the 9.29% the difference between the exact method and the naive-baise method is the exact method would need the the exact same independent variable classifications to predict, where the naive bayes method does not.
+>> 9.23% are very similar to the 9.297% the difference between the exact method and the naive-bayes method is the exact method would need the the exact same independent variable classifications to predict, where the naive bayes method does not.
 
 
-G. Which of the entries in this table are needed for computing P(Loan = 1 | CC = 1, Online = 1)? Run
-naive Bayes on the data. Examine the model output on training data, and find the entry that
-corresponds to P(Loan = 1 | CC = 1, Online = 1). Compare this to the number you obtained in (E).
+G. Which of the entries in this table are needed for computing P(Loan = 1 | CC = 1, Online = 1)? Run naive Bayes on the data. 
+Examine the model output on training data, and find the entry that corresponds to P(Loan = 1 | CC = 1, Online = 1). 
+Compare this to the number you obtained in (E).
+
 
 ```{r}
 library('e1071')
-naive.train = train.df[,c(10,13:14)]
-naive.test = test.df[,c(10,13:14)]
-naivebayes = naiveBayes(Personal.Loan~.,data=naive.train)
+train = train[,c(10,13:14)]
+test = test[,c(10,13:14)]
+naivebayes = naiveBayes(Personal.Loan~.,data=train)
 naivebayes
 ```
-the naive bayes is the exact same output we recieved in the previous methods. (.280)(.603)(.09)/(.280.603.09+.29.58.908) = .09 which is the same response provided as above.
+>> The naive bayes is the exact same output we retrieved in the previous methods. (0.288)*(0.595)*(0.093)/((0.288)*(0.595)*(0.093) + (0.293)*(0.589)*(0.906) = .0089 which is almost the same response provided as above.

@@ -230,12 +230,10 @@ bank &lt;- read.csv(&quot;UniversalBank.csv&quot;)</code></pre>
 bank$Online = as.factor(bank$Online)
 bank$CreditCard = as.factor(bank$CreditCard)</code></pre>
 <pre class="r"><code>set.seed(1)
-train.index &lt;- sample(row.names(bank), 0.6*dim(bank)[1])  
+train.index &lt;- sample(row.names(bank), 0.7*dim(bank)[1])  
 test.index &lt;- setdiff(row.names(bank), train.index) 
-train.df &lt;- bank[train.index, ]
-test.df &lt;- bank[test.index, ]
 train &lt;- bank[train.index, ]
-test = bank[train.index,]</code></pre>
+test &lt;- bank[test.index,]</code></pre>
 <p>A. Create a pivot table for the training data with Online as a column variable, CC as a row variable, and Loan as a secondary row variable. The values inside the table should convey the count. In R use functions melt() and cast(), or function table(). In Python, use panda dataframe methods melt() and pivot().</p>
 <pre class="r"><code>table(&quot;CC&quot;=bank$CreditCard,&quot;PL&quot;=bank$Personal.Loan,&quot;O/L&quot;=bank$Online)</code></pre>
 <pre><code>## , , O/L = 0
@@ -261,7 +259,11 @@ test = bank[train.index,]</code></pre>
   </script>
 </div>
 <p>B. Consider the task of classifying a customer who owns a bank credit card and is actively using online banking services. Looking at the pivot table, what is the probability that this customer will accept the loan offer? [This is the probability of loan acceptance (Loan = 1) conditional on having a bank credit card (CC = 1) and being an active user of online banking services (Online = 1)].</p>
+<blockquote>
+<blockquote>
 <p>Probability of Loan acceptance given having a bank credit card and user of online services is 82/882 = 0.09297</p>
+</blockquote>
+</blockquote>
 <p>C. Create two separate pivot tables for the training data. One will have Loan (rows) as a function of Online (columns) and the other will have Loan (rows) as a function of CC.</p>
 <pre class="r"><code>t2= recast(bank,bank$Personal.Loan~bank$Online)</code></pre>
 <pre><code>## Using Personal.Loan, Online, CreditCard as id variables</code></pre>
@@ -285,29 +287,33 @@ test = bank[train.index,]</code></pre>
 <pre class="r"><code>table(train[,c(14,10)])</code></pre>
 <pre><code>##           Personal.Loan
 ## CreditCard    0    1
-##          0 1924  198
-##          1  801   77</code></pre>
+##          0 2241  232
+##          1  933   94</code></pre>
 <pre class="r"><code>table(train[,c(13,10)])</code></pre>
 <pre><code>##       Personal.Loan
 ## Online    0    1
-##      0 1137  109
-##      1 1588  166</code></pre>
+##      0 1304  132
+##      1 1870  194</code></pre>
 <pre class="r"><code>table(train[,c(10)])</code></pre>
 <pre><code>## 
 ##    0    1 
-## 2725  275</code></pre>
-<p>P(Cc|Pl) = 77/(77+198) = 0.28 P(Ol|Pl) = 166/(166+109) = 0.603 P(Pl) = 275/(275+2725) = 0.1009 P(Cc|Pl’)= 801/(801+1924) = 0.2939 P(Ol|Pl’)= 1588/(1588+1137)= 0.5827 P(Pl’) = 2725/(275+2725) = 0.90833</p>
+## 3174  326</code></pre>
+<p>P(Cc|Pl) = 94/(94+232) = 0.28834 P(Ol|Pl) = 194/(194+132) = 0.59509 P(Pl) = 326/(326+3174) = 0.09314 P(Cc|Pl’)= 933/(933+2241) = 0.29395 P(Ol|Pl’)= 1870/(1870+1304)= 0.58916 P(Pl’) = 3174/(3174+326) = 0.90685</p>
 <p>E. Use the quantities computed above to compute the naive Bayes probability P(Loan = 1 | CC = 1, Online = 1).</p>
-<pre class="r"><code>((77/(77+198))*(166/(166+109))*(275/(275+2725)))/(((77/(77+198))*(166/(166+109))*(275/(275+2725)))+((801/(801+1924))*(1588/(1588+1137))*2725/(2725+275)))</code></pre>
-<pre><code>## [1] 0.09055758</code></pre>
+<pre class="r"><code>((94/(94+232))*(194/(194+132))*(326/(326+3174)))/(((94/(94+232))*(194/(194+132))*(326/(326+3174)))+((933/(933+2241))*(1870/(1870+1304))*3174/(3174+326)))</code></pre>
+<pre><code>## [1] 0.09236489</code></pre>
 <p>F. Compare this value with the one obtained from the pivot table in (B). Which is a more accurate estimate?</p>
-<p>9.05% are very similar to the 9.29% the difference between the exact method and the naive-baise method is the exact method would need the the exact same independent variable classifications to predict, where the naive bayes method does not.</p>
+<blockquote>
+<blockquote>
+<p>9.23% are very similar to the 9.297% the difference between the exact method and the naive-bayes method is the exact method would need the the exact same independent variable classifications to predict, where the naive bayes method does not.</p>
+</blockquote>
+</blockquote>
 <p>G. Which of the entries in this table are needed for computing P(Loan = 1 | CC = 1, Online = 1)? Run naive Bayes on the data. Examine the model output on training data, and find the entry that corresponds to P(Loan = 1 | CC = 1, Online = 1). Compare this to the number you obtained in (E).</p>
 <pre class="r"><code>library(&#39;e1071&#39;)</code></pre>
 <pre><code>## Warning: package &#39;e1071&#39; was built under R version 4.0.3</code></pre>
-<pre class="r"><code>naive.train = train.df[,c(10,13:14)]
-naive.test = test.df[,c(10,13:14)]
-naivebayes = naiveBayes(Personal.Loan~.,data=naive.train)
+<pre class="r"><code>train = train[,c(10,13:14)]
+test = test[,c(10,13:14)]
+naivebayes = naiveBayes(Personal.Loan~.,data=train)
 naivebayes</code></pre>
 <pre><code>## 
 ## Naive Bayes Classifier for Discrete Predictors
@@ -318,19 +324,23 @@ naivebayes</code></pre>
 ## A-priori probabilities:
 ## Y
 ##          0          1 
-## 0.90833333 0.09166667 
+## 0.90685714 0.09314286 
 ## 
 ## Conditional probabilities:
 ##    Online
 ## Y           0         1
-##   0 0.4172477 0.5827523
-##   1 0.3963636 0.6036364
+##   0 0.4108381 0.5891619
+##   1 0.4049080 0.5950920
 ## 
 ##    CreditCard
-## Y          0        1
-##   0 0.706055 0.293945
-##   1 0.720000 0.280000</code></pre>
-<p>the naive bayes is the exact same output we recieved in the previous methods. (.280)(.603)(.09)/(.280.603.09+.29.58.908) = .09 which is the same response provided as above.</p>
+## Y           0         1
+##   0 0.7060491 0.2939509
+##   1 0.7116564 0.2883436</code></pre>
+<blockquote>
+<blockquote>
+<p>The naive bayes is the exact same output we retrieved in the previous methods. (0.288)<em>(0.595)</em>(0.093)/((0.288)<em>(0.595)</em>(0.093) + (0.293)<em>(0.589)</em>(0.906) = .0089 which is almost the same response provided as above.</p>
+</blockquote>
+</blockquote>
 
 
 
