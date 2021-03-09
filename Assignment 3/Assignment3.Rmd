@@ -5,71 +5,93 @@ output:
     df_print: paged
   pdf_document: default
 ---
-```{r}
+```{r message=FALSE, warning=FALSE}
 #setwd("~/R_KSU/ML/Assignment 3")
 bank <- read.csv("UniversalBank.csv")
 ```
 
-
-```{r}
+### Importing libraries
+```{r message=FALSE, warning=FALSE}
+library(dplyr)
 library(reshape)
 library(reshape2)
+library(ggplot2)
+library(caret)
+```
+
+### Exploratory Data Analysis
+```{r}
 str(bank)
 ```
 
-```{r}
-summary(bank)
-```
+> From the above data table stucture we found that - 'Online', 'CreditCard' & 'Personal.Loan' columns have integer data type. But, these are nominal data and we need to convert them to categorical data. 
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 bank$Personal.Loan = as.factor(bank$Personal.Loan)
 bank$Online = as.factor(bank$Online)
 bank$CreditCard = as.factor(bank$CreditCard)
 ```
 
+#### Summary statistics of categorical variables.
+
+```{r message=FALSE, warning=FALSE}
+summary(bank %>% select(Online, CreditCard, Personal.Loan))
+```
 ```{r}
+ggplot(bank, aes(x=Online)) + geom_bar( fill='mediumaquamarine') + ggtitle('Ditribution of Online users') + theme_test() + scale_x_discrete(labels=c("No", "Yes")) + geom_text(aes(label=..count..),stat="count", vjust=1)
+```
+
+```{r}
+ggplot(bank, aes(x=CreditCard)) + geom_bar( fill='palegreen') + ggtitle('Ditribution of Credit Card users') + theme_test() + scale_x_discrete(labels=c("No", "Yes")) + geom_text(aes(label=..count..),stat="count", vjust=1)
+```
+
+```{r}
+ggplot(bank, aes(x=Personal.Loan)) + geom_bar( fill='olivedrab3') + ggtitle('Ditribution of customers who have opted for Personal.Loan') + theme_test() + scale_x_discrete(labels=c("No", "Yes")) + scale_x_discrete(labels=c("No", "Yes")) + geom_text(aes(label=..count..),stat="count", vjust=1)
+```
+
+## Data Preprocessing
+> Splitting data into train & test (60-40).
+
+```{r message=FALSE, warning=FALSE}
 set.seed(1)
-train.index <- sample(row.names(bank), 0.7*dim(bank)[1])  
-test.index <- setdiff(row.names(bank), train.index) 
-train <- bank[train.index, ]
-test <- bank[test.index,]
+train.index <- createDataPartition(bank$Personal.Loan, p=0.6, list= FALSE)
+train <- bank[train.index,]
+test <- bank[-train.index,]
+
 ```
 
 
-A. Create a pivot table for the training data with Online as a column variable, CC as a row variable, and Loan as a secondary row variable. 
+> A. Create a pivot table for the training data with Online as a column variable, CC as a row variable, and Loan as a secondary row variable. 
 The values inside the table should convey the count. In R use functions melt() and cast(), or function table(). In Python, use panda dataframe methods melt()
 and pivot().
 
-```{r}
-table("CC"=bank$CreditCard,"PL"=bank$Personal.Loan,"O/L"=bank$Online)
-```
-```{r}
-t1= recast(bank,bank$CreditCard+bank$Personal.Loan~bank$Online)
+```{r message=FALSE, warning=FALSE}
+t1= melt(train,id=c('CreditCard','Personal.Loan'),variable='Online')
+t1= dcast(t1, CreditCard+Personal.Loan~Online)
 t1
 ```
 
 
-B. Consider the task of classifying a customer who owns a bank credit card and is actively using online banking services. Looking at the pivot table, what is the probability that this customer will accept the loan offer? [This is the probability of loan acceptance (Loan = 1) conditional on having a bank credit card (CC = 1) and being an active user of online banking services (Online = 1)].
+> B. Consider the task of classifying a customer who owns a bank credit card and is actively using online banking services. Looking at the pivot table, what is the probability that this customer will accept the loan offer? [This is the probability of loan acceptance (Loan = 1) conditional on having a bank credit card (CC = 1) and being an active user of online banking services (Online = 1)].
 
 
 >> Probability of Loan acceptance given having a bank credit card and user of online services is 
-                              82/882 = 0.09297
+                              91/91+806 = 0.10144
+                                  => [10.144%]
 
 
-C. Create two separate pivot tables for the training data. One will have Loan (rows) as a function of Online (columns) and the other will have Loan (rows) as a function of CC.
-```{r}
-t2= recast(bank,bank$Personal.Loan~bank$Online)
-t2
+> C. Create two separate pivot tables for the training data. One will have Loan (rows) as a function of Online (columns) and the other will have Loan (rows) as a function of CC.
+
+```{r message=FALSE, warning=FALSE}
+as.data.frame(table(train[,c('Personal.Loan','CreditCard')]))
 ```
 
 
-```{r}
-t3= recast(bank,bank$CreditCard~bank$Online)
-t3
+```{r message=FALSE, warning=FALSE}
+as.data.frame(table(train[,c('Personal.Loan','Online')]))
 ```
 
-
-D. Compute the following quantities [P(A | B) means “the probability of A given B”]:
+> D. Compute the following quantities [P(A | B) means “the probability of A given B”]:
   i. P(CC = 1 | Loan = 1) (the proportion of credit card holders among the        loan acceptors)
   ii. P(Online = 1 | Loan = 1)
   iii. P(Loan = 1) (the proportion of loan acceptors)
@@ -77,50 +99,54 @@ D. Compute the following quantities [P(A | B) means “the probability of A give
   v. P(Online = 1 | Loan = 0)
   vi. P(Loan = 0)
 
-```{r}
-table(train[,c(14,10)])
+```{r message=FALSE, warning=FALSE}
+as.data.frame(table(train[,c(14,10)]))
 ```
 
-```{r}
-table(train[,c(13,10)])
+```{r message=FALSE, warning=FALSE}
+as.data.frame(table(train[,c(13,10)]))
 ```
 
-```{r}
-table(train[,c(10)])
+```{r message=FALSE, warning=FALSE}
+as.data.frame(table(train[,c(10)]))
 ```
-P(Cc|Pl) = 94/(94+232)     = 0.28834
-P(Ol|Pl) = 194/(194+132)   = 0.59509
-P(Pl)    = 326/(326+3174)  = 0.09314
-P(Cc|Pl')= 933/(933+2241)  = 0.29395
-P(Ol|Pl')= 1870/(1870+1304)= 0.58916
-P(Pl')   = 3174/(3174+326) = 0.90685
+>
+P(Cc|Pl) = 91/(91+197)     = 0.31597
+P(Ol|Pl) = 172/(172+116)   = 0.59722
+P(Pl)    = 288/(288+2712)  = 0.09600
+P(Cc|Pl')= 806/(806+1906)  = 0.29719
+P(Ol|Pl')= 1629/(1629+1083)= 0.60066
+P(Pl')   = 2712/(2712+288) = 0.90400
 
 
-E. Use the quantities computed above to compute the naive Bayes probability P(Loan = 1 | CC = 1,
+> E. Use the quantities computed above to compute the naive Bayes probability P(Loan = 1 | CC = 1,
 Online = 1).
 
-```{r}
-((94/(94+232))*(194/(194+132))*(326/(326+3174)))/(((94/(94+232))*(194/(194+132))*(326/(326+3174)))+((933/(933+2241))*(1870/(1870+1304))*3174/(3174+326)))
+```{r message=FALSE, warning=FALSE}
+(0.31597*0.59722*0.09600) / ((0.31597*0.59722*0.09600) + (0.29719*0.60066*0.90400))
 ```
 
 
-
-F. Compare this value with the one obtained from the pivot table in (B). Which is a more accurate
+> F. Compare this value with the one obtained from the pivot table in (B). Which is a more accurate
 estimate?
 
->> 9.23% are very similar to the 9.297% the difference between the exact method and the naive-bayes method is the exact method would need the the exact same independent variable classifications to predict, where the naive bayes method does not.
+>> 10.092% are very similar to the 10.144% the difference between the exact method and the naive-bayes method is the exact method would need the the exact same independent variable classifications to predict, where the naive bayes method does not.
 
 
-G. Which of the entries in this table are needed for computing P(Loan = 1 | CC = 1, Online = 1)? Run naive Bayes on the data. 
+> G. Which of the entries in this table are needed for computing P(Loan = 1 | CC = 1, Online = 1)? Run naive Bayes on the data. 
 Examine the model output on training data, and find the entry that corresponds to P(Loan = 1 | CC = 1, Online = 1). 
 Compare this to the number you obtained in (E).
 
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 library('e1071')
 train = train[,c(10,13:14)]
 test = test[,c(10,13:14)]
 naivebayes = naiveBayes(Personal.Loan~.,data=train)
 naivebayes
 ```
->> The naive bayes is the exact same output we retrieved in the previous methods. (0.288)*(0.595)*(0.093)/((0.288)*(0.595)*(0.093) + (0.293)*(0.589)*(0.906) = .0089 which is almost the same response provided as above.
+```{r}
+(0.3159)*(0.5972)*(0.096)/((0.3159)*(0.5972)*(0.096) + (0.2971)*(0.6006)*(0.904))
+```
+
+>> The naive bayes is the exact same output we retrieved in the previous methods. (0.3159)*(0.5972)*(0.096)/((0.3159)*(0.5972)*(0.096) + (0.2971)*(0.6006)*(0.904) = 0.100942 which is almost the same response provided as above.
