@@ -85,10 +85,17 @@ t1
 ```{r message=FALSE, warning=FALSE}
 as.data.frame(table(train[,c('Personal.Loan','CreditCard')]))
 ```
+```{r}
+ggplot(train, aes(x=CreditCard, fill=Personal.Loan)) + geom_bar() + ggtitle('Ditribution of Credit Card users') + theme_test() + scale_x_discrete(labels=c("No", "Yes")) +scale_fill_discrete(name = "Opted for Personal Loan?", labels = c("No", "Yes")) + geom_text(aes(label=..count..),stat="count", vjust=1)
+```
 
 
 ```{r message=FALSE, warning=FALSE}
 as.data.frame(table(train[,c('Personal.Loan','Online')]))
+```
+
+```{r}
+ggplot(train, aes(x=Online, fill=Personal.Loan)) + geom_bar() + ggtitle('Ditribution of Credit Card users') + theme_test() + scale_x_discrete(labels=c("No", "Yes")) +scale_fill_discrete(name = "Opted for Personal Loan?", labels = c("No", "Yes"))+ geom_text(aes(label=..count..),stat="count", vjust=1)
 ```
 
 > D. Compute the following quantities [P(A | B) means “the probability of A given B”]:
