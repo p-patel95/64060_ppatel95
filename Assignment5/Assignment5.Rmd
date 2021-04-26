@@ -1,10 +1,10 @@
 ---
 title: "Cluster Analysis on Breakfast Cereal"
 output:
-  pdf_document: default
   word_document: default
   html_document:
     df_print: paged
+  pdf_document: default
 ---
 
 # Problem Description
@@ -94,7 +94,7 @@ fviz_dist(distance, gradient = list(low= "#00AFBB", mid = "white", high = "#DC4E
 fviz_nbclust(cereals_data, FUN = hcut, method = "wss")
 ```
 
-* From these estimators, lets assume the optimum K would be 2 We shall evaluate its stability later.
+* From these estimators, lets assume the optimum K would be 3 We shall evaluate its stability later.
 
 # Hierarchical Clustering
 ### I used the euclidean distance measure.
@@ -105,12 +105,12 @@ dist <- dist(cereals_data[,1:12], method="euclidean")
 
 * hierarchical clustering using ward linkage method.
 ```{r , warning=FALSE, fig.width=13, fig.height=8, messages = FALSE}
-hc_fit_wd <- hclust(dist, method="ward")
+hc_fit_wd <- hclust(dist, method="ward.D2")
 plot(hc_fit_wd)
 ```
 
 ```{r , warning=FALSE, fig.width=10, fig.height=8, messages = FALSE}
-points_hc <- cutree(hc_fit_wd, k=2)
+points_hc <- cutree(hc_fit_wd, k=3)
 cereals_clusts_hc <- cbind(points_hc, cereals_data)
 
 colnames(cereals_clusts_hc)[1] <- "cluster_hc"
@@ -121,7 +121,7 @@ head(cereals_clusts_hc)
 ```{r , warning=FALSE, fig.width=10, fig.height=8, messages = FALSE}
 library(cluster)
 plot(hc_fit_wd)
-rect.hclust(hc_fit_wd, k = 2, border = "red")
+rect.hclust(hc_fit_wd, k = 3, border = "red")
 ```
 
 #### Quality of clusters Created
@@ -147,6 +147,8 @@ for (i in 2:20) {
 plot(1:20, sil_value_hc, type = "b", xlab = "No: of Clusters", ylab = "Silhouette Width")
 ```
 
+* According to the Silhoutte, the optimized cluster value is 4. Lets check the stability of 4 clusters with clusterboot method now.
+
 #### Cluster Stability
 
 * Clusterboot function using library(fpc)
@@ -154,7 +156,7 @@ plot(1:20, sil_value_hc, type = "b", xlab = "No: of Clusters", ylab = "Silhouett
 ```{r}
 library(fpc)
 #Input the scaled cereals_data
-hclust_stability = clusterboot(cereals_data, clustermethod=hclustCBI, method="ward.D2", k=2, count = FALSE)
+hclust_stability = clusterboot(cereals_data, clustermethod=hclustCBI, method="ward.D2", k=4, count = FALSE)
 hclust_stability
 ```
 
@@ -179,10 +181,12 @@ hclust_stability$bootmean
 hclust_stability$bootbrd 
 ```
 
+* selection of the cluster that would be the best cereal for breakfast are based on
+    - Sodium and Sugar content should be minimal
 ```{r}
 library(ggplot2)
-
 ggplot(cereals_clusts_hc, aes(sugars, sodium, color=factor(cluster_hc))) + geom_point()
 ```
 
+* Cluster 3 has the best options of healthy cereals that students can be served all 5 workdays - so that everyday with all different cereals. 
 
