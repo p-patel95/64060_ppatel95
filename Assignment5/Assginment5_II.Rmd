@@ -1,0 +1,36 @@
+---
+title: "Assignment5_II"
+author: "Prerak Patel"
+date: "4/25/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+setwd("~/R_KSU/ML/Assignment5")
+cereal_data <- read.csv("Cereals.csv", header=T)
+str(cereals_data)
+cereal_data <- na.omit(cereals_data)
+```
+
+```{r}
+smp_size <- floor(0.6 * nrow(cereal_data))
+
+set.seed(10)
+train_ind <- sample(seq_len(nrow(cereal_data)), size=smp_size)
+
+train <- cereals_data_norm[train_ind, ]
+test <- cereals_data_norm[train_ind, ]
+
+```
+
+```{r}
+library(factoextra)
+set.seed(10)
+km.res <- kmeans(train, 4, nstart = 25)
+print(km.res)
+```
+
+```{r}
+for
+```
+
