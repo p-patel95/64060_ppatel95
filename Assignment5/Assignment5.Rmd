@@ -1,13 +1,13 @@
 ---
 title: "Cluster Analysis on Breakfast Cereal"
 output:
+  word_document: default
+  pdf_document: default
   html_document:
     df_print: paged
-  pdf_document: default
-  word_document: default
 ---
 
-# Problem Description
+## Problem Description
 
 * In the following Unsupervised Learning activity, we try to cluster various types of breakfast cereal based on their nutritional content.
 
@@ -31,6 +31,7 @@ tail(cereals_data)
 ```
 
 # Data Pre-Processing
+
 ```{r warning=FALSE}
 # Total number of NA values in the data set
 colSums(is.na(cereals_data))
@@ -60,11 +61,13 @@ cereals_data <- fastDummies::dummy_cols(cereals_data, select_columns = "mfr")[,-
 cereals_data <- fastDummies::dummy_cols(cereals_data, select_columns = "type")[,-1]
 cereals_data <- fastDummies::dummy_cols(cereals_data, select_columns = "shelf")[,-10]
 str(cereals_data)
+
+# Assigning cereal lables as row names of the data frame.
 rownames(cereals_data) <- data$name
 head(cereals_data)
 ```
 
-# Data Normalization
+## Data Normalization
 
 ```{r warning=FALSE}
 ## Data Scaling 
@@ -78,7 +81,7 @@ rownames(cereals_data) <- data$name
 head(cereals_data)
 ```
 
-# DATA EXPLORATION
+## DATA EXPLORATION
 
 ```{r, warning=FALSE, fig.width=12, fig.height=8, messages = FALSE}
 # Correlation chart avoiding the dummified variables
@@ -88,7 +91,7 @@ distance <- get_dist(cereals_data[,2:13])
 fviz_dist(distance, gradient = list(low= "#00AFBB", mid = "white", high = "#DC4E07"))
 ```
 
-# Determining Optimal Clusters
+### Determining Optimal Clusters
 
 ```{r , warning=FALSE, fig.width=12, fig.height=8, messages = FALSE}
 fviz_nbclust(cereals_data, FUN = hcut, method = "wss")
@@ -96,19 +99,48 @@ fviz_nbclust(cereals_data, FUN = hcut, method = "wss")
 
 * From these estimators, lets assume the optimum K would be 3 We shall evaluate its stability later.
 
-# Hierarchical Clustering
-### I used the euclidean distance measure.
+## Hierarchical Clustering
+### I will use the euclidean distance measure distance.
 
 ```{r warning=FALSE}
 dist <- dist(cereals_data[,1:12], method="euclidean")
 ```
 
 * hierarchical clustering using ward linkage method.
+
 ```{r , warning=FALSE, fig.width=13, fig.height=8, messages = FALSE}
-hc_fit_wd <- hclust(dist, method="ward.D2")
+library(cluster)
+hc_fit_wd <- agnes(dist, method="ward")
 plot(hc_fit_wd)
 ```
 
+
+* hierarchical clustering using single linkage method.
+
+```{r , warning=FALSE, fig.width=13, fig.height=8, messages = FALSE}
+hc_fit_sg <- agnes(dist, method="single")
+plot(hc_fit_sg)
+```
+
+
+* hierarchical clustering using complete linkage method.
+
+```{r , warning=FALSE, fig.width=13, fig.height=8, messages = FALSE}
+hc_fit_cmp <- agnes(dist, method="complete")
+plot(hc_fit_cmp)
+```
+ 
+
+* hierarchical clustering using ward linkage method.
+
+```{r , warning=FALSE, fig.width=13, fig.height=8, messages = FALSE}
+hc_fit_avg <- agnes(dist, method="average")
+plot(hc_fit_avg)
+```
+
+
+#### Based on the agglomerative coefficients, "WARD" is the most efficient method to proceed further.
+    
 ```{r , warning=FALSE, fig.width=10, fig.height=8, messages = FALSE}
 points_hc <- cutree(hc_fit_wd, k=3)
 cereals_clusts_hc <- cbind(points_hc, cereals_data)
@@ -124,7 +156,7 @@ plot(hc_fit_wd)
 rect.hclust(hc_fit_wd, k = 3, border = "red")
 ```
 
-#### Quality of clusters Created
+### Checking Quality of clusters Created
 
     - The silhouette width/value is a measure of how similar an object is to its own cluster (cohesion) compared to other clusters (separation)  [i.e., intra-cluster cohesion and inter-cluster separation]
     - Ranges from -1 to +1  
@@ -137,7 +169,8 @@ sil_value = silhouette(points_hc, dist = dist)
 plot(sil_value)
 ```
 
-* Try to find the optimal number of clusters where silhouette width would be maximum
+* finding the optimal number of clusters where silhouette width would be maximum
+
 ```{r, warning=FALSE, fig.width=10, fig.height=4, messages = FALSE}
 sil_value_hc = 0
 for (i in 2:20) {
@@ -149,7 +182,9 @@ plot(1:20, sil_value_hc, type = "b", xlab = "No: of Clusters", ylab = "Silhouett
 
 * According to the Silhoutte, the optimized cluster value is 4 and 6. Lets check the stability of both 4 and 6 clusters with clusterboot method now.
 
-#### Cluster Stability
+### Cluster Stability
+
+#### Checking for Stability of k=4.
 
 * clusterboot is an integrated function that computes the clustering as well, using interface functions for various clustering methods implemented in R (several interface functions are provided, but you can implement further ones for your favourite clustering method)
 
@@ -159,14 +194,6 @@ plot(1:20, sil_value_hc, type = "b", xlab = "No: of Clusters", ylab = "Silhouett
 library(fpc)
 #Input the scaled cereals_data
 hclust_stability = clusterboot(cereals_data, clustermethod=hclustCBI, method="ward.D2", k=4, count = FALSE)
-hclust_stability
-```
-
-* Analyze the clustering results  
-
-```{r}
-clusters = hclust_stability$result$partition 
-data.frame(clusters)
 ```
 
 * What are the cluster stability values? Values > 0.85 denote very stable clusters. 0.6 - 0.75 means the clusters show some patterns but needs to be investigated further  
@@ -183,18 +210,12 @@ hclust_stability$bootmean
 hclust_stability$bootbrd 
 ```
 
-* Checking for Stability of k=6.
+#### Checking for Stability of k=6.
+
 ```{r}
 hclust_stability = clusterboot(cereals_data, clustermethod=hclustCBI, method="ward.D2", k=6, count = FALSE)
-hclust_stability
 ```
 
-* Analyze the clustering results  
-
-```{r}
-clusters = hclust_stability$result$partition 
-data.frame(clusters)
-```
 
 * What are the cluster stability values? Values > 0.85 denote very stable clusters. 0.6 - 0.75 means the clusters show some patterns but needs to be investigated further  
 
@@ -210,33 +231,37 @@ hclust_stability$bootmean
 hclust_stability$bootbrd 
 ```
 
-#### Hence, after checking the stability of both posible values of K; the best choice is 6.
+#### Hence, after checking the stability of both posible values of K; the best choice is 4.
 
-* Implementing the the hirarchical clustering with k=6
+* Implementing the the hierarchical clustering with k=4
 
 ```{r}
-points_hc_6 <- cutree(hc_fit_wd, k=6)
-cereals_clusts_hc_6 <- cbind(points_hc_6, cereals_data)
+points_hc_4 <- cutree(hc_fit_wd, k=4)
+cereals_clusts_hc_4 <- cbind(points_hc_4, cereals_data)
 
-colnames(cereals_clusts_hc_6)[1] <- "cluster_hc"
-head(cereals_clusts_hc_6)
+colnames(cereals_clusts_hc_4)[1] <- "cluster_hc"
+head(cereals_clusts_hc_4)
 ```
 
 ```{r , warning=FALSE, fig.width=10, fig.height=8, messages = FALSE}
-plot(hc_fit_wd)
-rect.hclust(hc_fit_wd, k = 6, border = "blue")
+pltree(hc_fit_wd, cex = 0.6, hang = -1, main = "Dendogram of Agnes-Ward")
+rect.hclust(hc_fit_wd, k = 4, border = 2:5)
 ```
 
-#### Quality of clusters Created
+#### checking Quality of clusters Created
 
 ```{r , warning=FALSE, fig.width=10, fig.height=8, messages = FALSE}
 library(cluster)
-dist = daisy(x = cereals_clusts_hc_6, metric = "euclidean")
-sil_value = silhouette(points_hc_6, dist = dist)
+dist = daisy(x = cereals_clusts_hc_4, metric = "euclidean")
+sil_value = silhouette(points_hc_4, dist = dist)
 plot(sil_value)
 ```
 
-* selection of the cluster that would be the best cereal for breakfast are based on
+* A significant improvement in the silhouette width from the case when k was 3.
+
+
+
+##### Selection of the cluster that would be the best cereal for breakfast are based on:
     - Sodium and Sugar content should be minimal
 
 * Cluster 3 has the best options of healthy cereals that students can be served all 5 workdays - so that everyday they can be served with different cereals. 
@@ -245,19 +270,16 @@ plot(sil_value)
 library(hrbrthemes)
 library(GGally)
 
-cereals_clusts_hc_6$cluster_hc <- as.factor(cereals_clusts_hc_6$cluster_hc)
+cereals_clusts_hc_4$cluster_hc <- as.factor(cereals_clusts_hc_4$cluster_hc)
 
-ggparcoord(cereals_clusts_hc_6,
+ggparcoord(cereals_clusts_hc_4,
     columns = c(4,5,8,9), groupColumn = 1,
     showPoints = TRUE, 
     title = "Parallel Coordinate Plot for the Cereals",
     alphaLines = 1
-    ) + 
-  theme(
-    plot.title = element_text(size=10)
-  )
+    ) + theme(plot.title = element_text(size=10))
 ```
 
-* Approaching forward with an elimination technique, we will cancel a few parameters to be condisered while choosing the best cluster for healthy breakfast. 
-    - We will consider fat, sodium, sugars and potass for choosing; the cereal having the least nutrition value in these citereans should be eliminated from selection.
-    - Cluster 5 seems to be the best choice.
+* Approaching forward with an elimination technique, we will cancel a few parameters to be considered while choosing the best cluster for healthy breakfast. 
+    - We will consider fat, sodium, sugars and potash for choosing; the cereal having the least nutrition value in these criteria should be eliminated from selection.
+    - Cluster 4 seems to be the best choice.
